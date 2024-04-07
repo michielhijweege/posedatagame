@@ -1,0 +1,145 @@
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+<script src="learn.js" type="module" crossorigin="anonymous"></script>
+<link rel="stylesheet" type="text/css" href="./style.css">
+<link rel="icon" type="image/x-icon" href="https://cdn-icons-png.freepik.com/256/686/686589.png">
+<body style="padding: 10px">
+
+<section id="demos" class="invisible">
+    <button id="playButton">
+    <span>PLAY</span>
+</button>
+    <h2>Hoe verzamel je hand poses</h2>
+    <p>
+        Click op <b>enable webcam</b> om toegang tegeven tot de webcam.
+        zet je hand hand voor de camera select welke actie je wilt uitvoeren en maak foto's tijdens je de hand pose hout die je wilt oplaan.
+    </p>
+
+    <div id="liveView" class="videoView">
+        <button id="webcamButtontest">
+            <span></span>
+            <span>ENABLE WEBCAM</span>
+        </button>
+        <div style="position: relative;">
+            <video id="webcam" style="position: absolute; left: 0px;top: 0px;width: 640px;height: 480px;" autoplay playsinline></video>
+            <canvas class="output_canvas" id="output_canvas" style="position: absolute;left: 0px;top: 0px;width: 640px;height: 480px;"></canvas>
+        </div>
+    </div>
+    <form id="inputForm">
+        <input type="text" id="numbers" name="numbers" hidden="hidden">
+        <label for="label">Select a label:</label><br>
+        <select id="label" name="label">
+            <option value="shoot">shoot</option>
+            <option value="empty">empty</option>
+        </select><br>
+        <button type="button" onclick="saveData()">Save</button>
+        <button onclick="downloadJSON()">Download JSON</button><br>
+        <input type="file" id="fileInput" accept=".json">
+        <button onclick="loadJSON()">Load JSON</button>
+    </form>
+</section>
+
+<script>
+    // save de data naar localStorage
+    function saveData() {
+        let existingData = [];
+        try {
+            existingData = JSON.parse(localStorage.getItem("formData")) || [];
+        } catch (error) {
+            console.error("Error parsing existing data:", error);
+        }
+
+        // Get the values from the form
+        const label = document.getElementById("label").value;
+        const numbers = document.getElementById("numbers").value.trim();
+
+        // Create a new data object
+        const newData = {
+            "label": label,
+            "numbers": numbers.split(',').map(num => num.trim())
+        };
+
+        existingData.push(newData);
+
+        try {
+            localStorage.setItem("formData", JSON.stringify(existingData));
+            console.log("Data saved successfully:", newData);
+        } catch (error) {
+            console.error("Error saving data:", error);
+        }
+    }
+
+    // download de data naar een json document
+    function downloadJSON() {
+        const jsonData = localStorage.getItem("formData");
+
+        if (!jsonData) {
+            console.error("No data available to download.");
+            return;
+        }
+
+        const blob = new Blob([jsonData], { type: "application/json" });
+
+        const anchor = document.createElement("a");
+        anchor.href = URL.createObjectURL(blob);
+
+        anchor.download = "formData.json";
+
+        document.body.appendChild(anchor);
+
+        anchor.click();
+
+        document.body.removeChild(anchor);
+    }
+
+    // laad data van de localStorage
+    function loadData() {
+        // Retrieve JSON data from localStorage
+        const jsonData = localStorage.getItem('savedData');
+
+        // Parse JSON data
+        const data = JSON.parse(jsonData);
+
+        // If data exists, populate the form fields
+        if (data) {
+            document.getElementById("numbers").value = data.numbers;
+            document.getElementById("label").value = data.label;
+        }
+    }
+
+    // als de pagina geladen is start de load functie
+    window.onload = function() {
+        loadData();
+    };
+
+    // zoek button element om te navigeren
+    var playButton = document.getElementById("playButton");
+
+    // voeg een event listener om naar index.html tegaan
+    playButton.addEventListener("click", function() {
+        window.location.href = "index.html";
+    });
+
+    // laad een extern json document en sla dit op in de localStorage
+    function loadJSON() {
+        const fileInput = document.getElementById('fileInput');
+
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(event) {
+                const jsonData = JSON.parse(event.target.result);
+
+                localStorage.removeItem('formData');
+                localStorage.setItem('formData', JSON.stringify(jsonData));
+
+                alert('JSON data loaded and saved to local storage.');
+            };
+
+            reader.readAsText(file);
+        } else {
+            alert('Please select a JSON file.');
+        }
+    }
+</script>

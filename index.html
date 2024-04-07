@@ -1,0 +1,61 @@
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+<script src="index.js" type="module" crossorigin="anonymous"></script>
+<link rel="icon" type="image/x-icon" href="https://cdn-icons-png.freepik.com/256/686/686589.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open%20Sans" />
+<link rel="stylesheet" type="text/css" href="style.css">
+<body>
+<section id="demos" class="invisible">
+   <div id="liveView" class="videoView">
+      <button id="webcamButton">
+         <span>ENABLE WEBCAM</span>
+      </button>
+
+      <button id="learnButton">
+         <span>LEARN</span>
+      </button>
+
+      <video id="webcam" style="position: absolute; display: none" autoplay playsinline></video>
+      <canvas class="output_canvas" id="output_canvas" style="position: absolute; left: 0px; top: 0px; "></canvas>
+   </div>
+   <input type="text" id="numbers" name="numbers" style="display: none" value="0">
+   <input type="checkbox" id="shoot" name="shoot" style="display: none">
+</section>
+<script type="text/javascript" src="./main.js"></script>
+<script type=module" src="./src/game.ts" defer></script>
+<script>
+   function update() {
+      // verplaats de player functie
+      let inputString = document.getElementById("numbers").value.trim();
+      let coordinates = inputString.split(',').map(Number);
+      if (coordinates.length >= 3) {
+         var x = coordinates[0];
+         var y = coordinates[1];
+         var z = coordinates[2];
+         if(Game){
+            Game.ship.setPosition(x, y, z);
+         }else{
+            console.log("retry")
+         }
+
+         // schiet player functie
+         const checkboxshoot = document.getElementById('shoot');
+         if (checkboxshoot.checked) {
+            console.log(`shoot`);
+            Game.ship.fire();
+         }
+      }
+      requestAnimationFrame(update);
+   }
+
+   // Start de update loop
+   update();
+
+   // zoek de button element
+   var learnButton = document.getElementById("learnButton");
+
+   // voeg een click event toe om naar learn pagina te gaan
+   learnButton.addEventListener("click", function() {
+      window.location.href = "learn.html";
+   });
+</script>
