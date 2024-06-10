@@ -20,6 +20,7 @@
    </div>
    <input type="text" id="numbers" name="numbers" style="display: none" value="0">
    <input type="checkbox" id="shoot" name="shoot" style="display: none">
+   <input type="checkbox" id="defend" name="defend" style="display: none">
 </section>
 <script type="text/javascript" src="./main.js"></script>
 <script type=module" src="./src/game.ts" defer></script>
@@ -43,6 +44,13 @@
          if (checkboxshoot.checked) {
             console.log(`shoot`);
             Game.ship.fire();
+         }
+
+         // defend player functie
+         const checkboxdefend = document.getElementById('defend');
+         if (checkboxdefend.checked) {
+            console.log(`defend`);
+            Game.ship.defend();
          }
       }
       requestAnimationFrame(update);

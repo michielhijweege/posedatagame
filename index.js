@@ -148,38 +148,64 @@ async function predictWebcam() {
         // Parse JSON data into an array of objects
         const formDataArray = JSON.parse(jsonData);
 
-        // Loop through each entry
         formDataArray.forEach(formData => {
-            // Extract numbers and label from each entry
             const { numbers, label } = formData;
             const numbersArray = numbers.map(Number.parseFloat);
 
-            // Call the machine learning function for each entry
             machine.learn(numbersArray, label);
-            //console.log(numbersArray)
         });
         once = true;
         console.error("Machine learning model is not initialized.");
     }
     if (machine) {
-        // Assuming `inputLandmarks` is your array of numbers
         if(inputLandmarks != null){
             machine.classify(inputLandmarks)
-            //console.log(`I think this is a ` + machine.classify(inputLandmarks))
             if(machine.classify(inputLandmarks) === 'shoot'){
-                // Get the checkbox element
                 const checkbox = document.getElementById('shoot');
-                // Set the checkbox to be checked (on)
                 checkbox.checked = true;
             }else{
-                // Get the checkbox element
                 const checkbox = document.getElementById('shoot');
-                // Set the checkbox to be checked (on)
+                checkbox.checked = false;
+            }
+            if(machine.classify(inputLandmarks) === 'defend'){
+                const checkbox = document.getElementById('defend');
+                checkbox.checked = true;
+            }else{
+                const checkbox = document.getElementById('defend');
                 checkbox.checked = false;
             }
         }
     } else {
         console.error("Machine learning model is not initialized.");
+    }
+
+    if (machine && inputLandmarks) {
+        const jsonData = localStorage.getItem("formData");
+        if (!jsonData) {
+            console.error("No data available to download.");
+        }
+        const formDataArray = JSON.parse(jsonData);
+
+        let minDistance = Infinity;
+        formDataArray.forEach(formData => {
+            const { numbers } = formData;
+            const numbersArray = numbers.map(Number.parseFloat);
+            const distance = euclideanDistance(inputLandmarks, numbersArray);
+            if (distance < minDistance) {
+                minDistance = distance;
+            }
+        });
+        const maxDistance = Math.sqrt(inputLandmarks.length);
+        const similarityPercentage = ((maxDistance - minDistance) / maxDistance) * 100;
+        console.log("De accuratie is :", similarityPercentage, "%");
+    }
+
+    function euclideanDistance(point1, point2) {
+        let sum = 0;
+        for (let i = 0; i < point1.length; i++) {
+            sum += Math.pow(point1[i] - point2[i], 2);
+        }
+        return Math.sqrt(sum);
     }
 }
 
